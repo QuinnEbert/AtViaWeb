@@ -1,3 +1,55 @@
+<?php
+// Function returns true or false indicating whether there's any hope of $filename beginning with a shebang line, this means:
+// true response means that:
+//   + file exists
+//   + file is readable
+//   + file is at least 3 bytes long
+//   + first three bytes are exactly "#!/"
+// false response means that:
+//   + one or more of the above are unsatisfied
+// Be aware that this function *is* optimized to use as little system resources as possible.  I.E. it won't read more than
+// three bytes from the file, and if the file is less than three bytes in size, it won't even be opened at all.
+function banghope($filename) {
+	if (!file_exists($filename))
+		return false;
+	if (!is_readable($filename))
+		return false;
+	if (filesize($filename) < 3)
+		return false;
+	$handle = fopen($filename, "rb");
+	if ($handle === false)
+		return false;
+	$a = fgetc($handle); $b = fgetc($handle); $c = fgetc($handle);
+	fclose($handle);
+	$testing = "{$a}{$b}{$c}";
+	if ($testing != "#!/")
+		return false;
+	return true;
+}
+
+// Function returns a zero-based one-dimensional array indicating which files (searching recursively) under $directoryname
+// have shebang lines at the tops of them.
+// Set $eatPath to true to output only the basename() of each found file rather than the full path (use with caution!)
+function findshellscripts($directoryname,$eatPath = false) {
+	$currDir = escapeshellarg($directoryname);
+	$theList = explode("\n",trim(`find $currDir`));
+	$currNum = 0;
+	foreach($theList as $tryItem) {
+		if (! is_dir($tryItem)) {
+			$inFile = $tryItem;
+			if (banghope($inFile)) {
+				if (! $eatPath) {
+					$myFiles[$currNum] = $tryItem;
+				} else {
+					$myFiles[$currNum] = basename($tryItem);
+				}
+				$currNum++;
+			}
+		}
+	}
+	return $myFiles;
+}
+?>
 <html>
 <head>
 <title>At via Web (Web Command Scheduler)</title>
