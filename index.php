@@ -55,6 +55,10 @@ function findshellscripts($directoryname,$eatPath = false) {
 <title>At via Web (Web Command Scheduler)</title>
 <script language="JavaScript">
 <!--
+ function submitIt() {
+	document.getElementById('jobexec').disabled = '';
+	document.getElementById('jobform').submit();
+ }
  function enterArg(args) {
 	document.getElementById('jobexec').value = document.getElementById('jobpick').value+' '+args.value;
  }
@@ -115,14 +119,19 @@ if (strlen($results)) {
      * [1][1] = Scheduled Time
      * [1][2] = (ignore this...) <= normally will be "a"
      * [1][3] = (ignore this...) <= should be your username
+     * [2]    = Commands in job (constructed just below...)
      */
+    // Try to also construct the command line via running `at -c <...>`:
+    $jobsNum = $theJobs[$index][0];
+    $jobCmds = explode("unset OLDPWD",`at -c $jobsNum`,2);
+    $theJobs[$index][2] = trim($jobCmds[1]);
   }
   // Output a table header:
   echo('<table align="center" border="1" cellspacing="1" cellpadding="4"><tr><td><b>Job ID</b></td><td><b>Scheduled Date</b></td><td><b>Scheduled Time</b></td><td><b>Command Set</b></td><td><b>Job Actions</b></td></tr>');
   // Output the list (if we have any jobs):
   foreach ($theJobs as $atJob) {
     // Job information:
-    echo('<tr><td>'.$atJob[0].'</td><td>'.$atJob[1][0].'</td><td>'.$atJob[1][1].'</td><td><i>Available in future versions...</i></td>');
+    echo('<tr><td>'.$atJob[0].'</td><td>'.$atJob[1][0].'</td><td>'.$atJob[1][1].'</td><td><pre>'.$atJob[2].'</pre></td>');
     // Job actions:
     echo('<td><form style="margin-bottom: 0px; margin-top: 0px;" action="'.basename(__FILE__).'" method="GET"><input type="hidden" name="jobID" value="'.$atJob[0].'" /><input style="margin-bottom: 0px; margin-top: 0px;" type="submit" name="action" value="Delete Job" /></form></td>');
     // End of table row:
@@ -144,7 +153,7 @@ if (strlen($results)) {
 <table align="center" border="1" cellspacing="1" cellpadding="4" width="25%">
 <tr>
 <td align="center" valign="middle">
-  <form style="margin-bottom: 0px;" action="<?php echo(basename(__FILE__)); ?>" method="GET">
+  <form style="margin-bottom: 0px;" action="<?php echo(basename(__FILE__)); ?>" id="jobform" method="GET">
     <label for="jobtime">At Job Time Specification:</label><br />
     <input type="text" name="jobtime" id="jobtime" size="32" /><br />
     <label for="jobexec">Run Command<br /><em>Option 1: Enter Command</em></label><br />
@@ -163,7 +172,7 @@ if (strlen($results)) {
     <label for="jobargs">Run Command<br /><em>Option 2, Step 2: Enter Arguments</em></label><br />
     <input type="text" name="jobargs" id="jobargs" size="32" disabled="disabled" onChange="enterArg(this)" /><br />
     <input type="hidden" name="action" value="Add Job" />
-    <input style="margin-bottom: 0px;" type="submit" name="Add Job" value="Add Job" />
+    <input style="margin-bottom: 0px;" type="button" name="Add Job" value="Add Job" onClick="submitIt()" />
   </form>
 </td>
 </tr>
