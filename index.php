@@ -53,6 +53,25 @@ function findshellscripts($directoryname,$eatPath = false) {
 <html>
 <head>
 <title>At via Web (Web Command Scheduler)</title>
+<script language="JavaScript">
+<!--
+ function enterArg(args) {
+	document.getElementById('jobexec').value = document.getElementById('jobpick').value+' '+args.value;
+ }
+ function picksJob(jobs) {
+	if (jobs.selectedIndex > 0) {
+		document.getElementById('jobexec').disabled = 'disabled';
+		document.getElementById('jobargs').disabled = '';
+		document.getElementById('jobargs').value = '';
+		document.getElementById('jobexec').value = jobs.value;
+	} else {
+		document.getElementById('jobargs').disabled = 'disabled';
+		document.getElementById('jobexec').disabled = '';
+		document.getElementById('jobexec').value = '';
+	}
+ }
+ -->
+</script>
 </head>
 <body>
 <h1 align="center">At via Web</h1>
@@ -105,7 +124,7 @@ if (strlen($results)) {
     // Job information:
     echo('<tr><td>'.$atJob[0].'</td><td>'.$atJob[1][0].'</td><td>'.$atJob[1][1].'</td><td><i>Available in future versions...</i></td>');
     // Job actions:
-    echo('<td><form style="margin-bottom: 0px; margin-top: 0px;" action="'.basename(__FILE__).'" method="POST"><input type="hidden" name="jobID" value="'.$atJob[0].'" /><input style="margin-bottom: 0px; margin-top: 0px;" type="submit" name="action" value="Delete Job" /></form></td>');
+    echo('<td><form style="margin-bottom: 0px; margin-top: 0px;" action="'.basename(__FILE__).'" method="GET"><input type="hidden" name="jobID" value="'.$atJob[0].'" /><input style="margin-bottom: 0px; margin-top: 0px;" type="submit" name="action" value="Delete Job" /></form></td>');
     // End of table row:
     echo('</tr>');
   }
@@ -125,11 +144,24 @@ if (strlen($results)) {
 <table align="center" border="1" cellspacing="1" cellpadding="4" width="25%">
 <tr>
 <td align="center" valign="middle">
-  <form style="margin-bottom: 0px;" action="<?php echo(basename(__FILE__)); ?>" method="POST">
+  <form style="margin-bottom: 0px;" action="<?php echo(basename(__FILE__)); ?>" method="GET">
     <label for="jobtime">At Job Time Specification:</label><br />
     <input type="text" name="jobtime" id="jobtime" size="32" /><br />
-    <label for="jobexec">Run Command:</label><br />
+    <label for="jobexec">Run Command<br /><em>Option 1: Enter Command</em></label><br />
     <input type="text" name="jobexec" id="jobexec" size="32" /><br />
+    <label for="jobpick">Run Command<br /><em>Option 2, Step 1: Select Script</em></label><br />
+    <select name="jobpick" id="jobpick" onChange="picksJob(this)">
+	<option value="<?php echo('/'); ?>">Manual Entry</option>
+	<?php
+	foreach (findshellscripts(dirname(__FILE__)) as $aScript) {
+		if ($aScript!='/') {
+			?><option value="<?php echo($aScript); ?>"><?php echo(basename($aScript)); ?></option><?php
+		}
+	}
+	?>
+	</select><br />
+    <label for="jobargs">Run Command<br /><em>Option 2, Step 2: Enter Arguments</em></label><br />
+    <input type="text" name="jobargs" id="jobargs" size="32" disabled="disabled" onChange="enterArg(this)" /><br />
     <input type="hidden" name="action" value="Add Job" />
     <input style="margin-bottom: 0px;" type="submit" name="Add Job" value="Add Job" />
   </form>
