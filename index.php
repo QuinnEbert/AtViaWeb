@@ -171,7 +171,7 @@ if (strlen($results)) {
 	?>
 	</select><br />
     <label for="jobargs">Enter Arguments</label><br />
-    <input type="text" name="jobargs" id="jobargs" size="32" disabled="disabled" onChange="enterArg(this)" /><br />
+    <input type="text" name="jobargs" id="jobargs" size="32" onChange="enterArg(this)" /><br />
     <input type="hidden" name="action" value="Add Job" />
     <input style="margin-bottom: 0px;" type="button" name="Add Job" value="Add Job" onClick="submitIt()" />
   </form>
