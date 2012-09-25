@@ -110,15 +110,12 @@ if (strlen($results)) {
   // Parse through the fetched list, make it useful:
   foreach ($results as $index => $value) {
     $theJobs[$index] = explode("\t",$value);
-    $theJobs[$index][1] = explode(" ",$theJobs[$index][1]);
+    $theJobs[$index][1] = $theJobs[$index][1];
     /*
      * This results in an array with the following "parsed" format:
      * 
      * [0]    = Job ID
-     * [1][0] = Scheduled Date
-     * [1][1] = Scheduled Time
-     * [1][2] = (ignore this...) <= normally will be "a"
-     * [1][3] = (ignore this...) <= should be your username
+     * [1]    = Scheduled Date + Time
      * [2]    = Commands in job (constructed just below...)
      */
     // Try to also construct the command line via running `at -c <...>`:
@@ -127,11 +124,11 @@ if (strlen($results)) {
     $theJobs[$index][2] = trim($jobCmds[1]);
   }
   // Output a table header:
-  echo('<table align="center" border="1" cellspacing="1" cellpadding="4"><tr><td><b>Job ID</b></td><td><b>Scheduled Date</b></td><td><b>Scheduled Time</b></td><td><b>Command Set</b></td><td><b>Job Actions</b></td></tr>');
+  echo('<table align="center" border="1" cellspacing="1" cellpadding="4"><tr><td><b>Job ID</b></td><td><b>Scheduled Date and Time</b></td><td><b>Command Set</b></td><td><b>Job Actions</b></td></tr>');
   // Output the list (if we have any jobs):
   foreach ($theJobs as $atJob) {
     // Job information:
-    echo('<tr><td>'.$atJob[0].'</td><td>'.$atJob[1][0].'</td><td>'.$atJob[1][1].'</td><td><pre>'.$atJob[2].'</pre></td>');
+    echo('<tr><td>'.$atJob[0].'</td><td>'.$atJob[1].'</td><td><pre>'.$atJob[2].'</pre></td>');
     // Job actions:
     echo('<td><form style="margin-bottom: 0px; margin-top: 0px;" action="'.basename(__FILE__).'" method="GET"><input type="hidden" name="jobID" value="'.$atJob[0].'" /><input style="margin-bottom: 0px; margin-top: 0px;" type="submit" name="action" value="Delete Job" /></form></td>');
     // End of table row:
