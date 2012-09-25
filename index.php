@@ -56,23 +56,23 @@ function findshellscripts($directoryname,$eatPath = false) {
 <script language="JavaScript">
 <!--
  function submitIt() {
-	document.getElementById('jobexec').disabled = '';
+	//document.getElementById('jobexec').disabled = '';
 	document.getElementById('jobform').submit();
  }
  function enterArg(args) {
 	document.getElementById('jobexec').value = document.getElementById('jobpick').value+' '+args.value;
  }
  function picksJob(jobs) {
-	if (jobs.selectedIndex > 0) {
-		document.getElementById('jobexec').disabled = 'disabled';
-		document.getElementById('jobargs').disabled = '';
+	/*if (jobs.selectedIndex > 0) {*/
+		//document.getElementById('jobexec').disabled = 'disabled';
+		//document.getElementById('jobargs').disabled = '';
 		document.getElementById('jobargs').value = '';
 		document.getElementById('jobexec').value = jobs.value;
-	} else {
+	/*} else {
 		document.getElementById('jobargs').disabled = 'disabled';
 		document.getElementById('jobexec').disabled = '';
 		document.getElementById('jobexec').value = '';
-	}
+	}*/
  }
  -->
 </script>
@@ -124,7 +124,10 @@ if (strlen($results)) {
     $jobsNum = $theJobs[$index][0];
     $jobCmds = explode("\n",trim(`at -c $jobsNum`));
     $jcIndex = (count($jobCmds)-1);
-    $theJobs[$index][2] = trim($jobCmds[$jcIndex]);
+    // Strip the pathname from commands (very tacky approach):
+    $tmpJDIA = explode('/',trim($jobCmds[$jcIndex]));
+    $jcIndex = (count($tmpJDIA)-1);
+    $theJobs[$index][2] = $tmpJDIA[$jcIndex];
   }
   // Output a table header:
   echo('<table align="center" border="1" cellspacing="1" cellpadding="4"><tr><td><b>Job ID</b></td><td><b>Scheduled Date and Time</b></td><td><b>Command Set</b></td><td><b>Job Actions</b></td></tr>');
@@ -156,11 +159,9 @@ if (strlen($results)) {
   <form style="margin-bottom: 0px;" action="<?php echo(basename(__FILE__)); ?>" id="jobform" method="GET">
     <label for="jobtime">At Job Time Specification:</label><br />
     <input type="text" name="jobtime" id="jobtime" size="32" /><br />
-    <label for="jobexec">Run Command<br /><em>Option 1: Enter Command</em></label><br />
-    <input type="text" name="jobexec" id="jobexec" size="32" /><br />
-    <label for="jobpick">Run Command<br /><em>Option 2, Step 1: Select Script</em></label><br />
+    <input type="hidden" name="jobexec" id="jobexec" size="32" />
+    <label for="jobpick">Run Command</label><br />
     <select name="jobpick" id="jobpick" onChange="picksJob(this)">
-	<option value="<?php echo('/'); ?>">Manual Entry</option>
 	<?php
 	foreach (findshellscripts(dirname(__FILE__)) as $aScript) {
 		if ($aScript!='/') {
@@ -169,7 +170,7 @@ if (strlen($results)) {
 	}
 	?>
 	</select><br />
-    <label for="jobargs">Run Command<br /><em>Option 2, Step 2: Enter Arguments</em></label><br />
+    <label for="jobargs">Enter Arguments</label><br />
     <input type="text" name="jobargs" id="jobargs" size="32" disabled="disabled" onChange="enterArg(this)" /><br />
     <input type="hidden" name="action" value="Add Job" />
     <input style="margin-bottom: 0px;" type="button" name="Add Job" value="Add Job" onClick="submitIt()" />
