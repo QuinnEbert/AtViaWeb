@@ -110,7 +110,9 @@ if (strlen($results)) {
   // Parse through the fetched list, make it useful:
   foreach ($results as $index => $value) {
     $theJobs[$index] = explode("\t",$value);
-    $theJobs[$index][1] = $theJobs[$index][1];
+    // Strip useless info (' a <username>') from the end of the date/time bit:
+    $tmpJDIB = explode(' a',$theJobs[$index][1],2);
+    $theJobs[$index][1] = $tmpJDIB[0];
     /*
      * This results in an array with the following "parsed" format:
      * 
@@ -120,8 +122,9 @@ if (strlen($results)) {
      */
     // Try to also construct the command line via running `at -c <...>`:
     $jobsNum = $theJobs[$index][0];
-    $jobCmds = explode("unset OLDPWD",`at -c $jobsNum`,2);
-    $theJobs[$index][2] = trim($jobCmds[1]);
+    $jobCmds = explode("\n",trim(`at -c $jobsNum`));
+    $jcIndex = (count($jobCmds)-1);
+    $theJobs[$index][2] = trim($jobCmds[$jcIndex]);
   }
   // Output a table header:
   echo('<table align="center" border="1" cellspacing="1" cellpadding="4"><tr><td><b>Job ID</b></td><td><b>Scheduled Date and Time</b></td><td><b>Command Set</b></td><td><b>Job Actions</b></td></tr>');
